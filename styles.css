@@ -7,30 +7,166 @@
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     min-height: 100vh;
-    transition: background-image 1s ease-in-out;
+    transition: all 1.5s ease-in-out;
     background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
     background-size: cover;
     background-position: center;
+    position: relative;
+    overflow-x: hidden;
 }
 
+/* 晴天效果 - 阳光明媚 */
 body.sunny {
     background: linear-gradient(135deg, #fdcb6e 0%, #e17055 100%);
+    animation: sunnyGlow 4s ease-in-out infinite alternate;
 }
 
+/* 多云效果 - 云层飘动 */
 body.cloudy {
     background: linear-gradient(135deg, #636e72 0%, #2d3436 100%);
+    animation: cloudyMove 6s ease-in-out infinite alternate;
 }
 
+/* 雨天效果 - 雨滴动画 */
 body.rainy {
     background: linear-gradient(135deg, #0984e3 0%, #6c5ce7 100%);
+    animation: rainEffect 3s linear infinite;
 }
 
+/* 雪天效果 - 雪花飘落 */
 body.snowy {
     background: linear-gradient(135deg, #dfe6e9 0%, #b2bec3 100%);
+    animation: snowFall 8s linear infinite;
 }
 
+/* 夜晚效果 - 星空闪烁 */
 body.night {
     background: linear-gradient(135deg, #2d3436 0%, #000000 100%);
+    animation: starTwinkle 5s ease-in-out infinite alternate;
+}
+
+/* 天气粒子效果容器 */
+.weather-particles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* 雨滴粒子 */
+.raindrop {
+    position: absolute;
+    width: 2px;
+    height: 15px;
+    background: linear-gradient(to bottom, transparent, #74b9ff);
+    animation: raindropFall 1.5s linear infinite;
+}
+
+/* 雪花粒子 */
+.snowflake {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: white;
+    border-radius: 50%;
+    animation: snowflakeFall 8s linear infinite;
+    opacity: 0.8;
+}
+
+/* 星星粒子 */
+.star {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: white;
+    border-radius: 50%;
+    animation: starTwinkle 3s ease-in-out infinite alternate;
+}
+
+/* 阳光粒子 */
+.sunbeam {
+    position: absolute;
+    width: 100px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #fdcb6e, transparent);
+    animation: sunbeamRotate 10s linear infinite;
+}
+
+/* 关键帧动画 */
+@keyframes sunnyGlow {
+    0% { filter: brightness(1) hue-rotate(0deg); }
+    100% { filter: brightness(1.1) hue-rotate(5deg); }
+}
+
+@keyframes cloudyMove {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
+}
+
+@keyframes rainEffect {
+    0% { background-position: 0% 0%; }
+    100% { background-position: 0% 100%; }
+}
+
+@keyframes snowFall {
+    0% { background-position: 0% 0%; }
+    100% { background-position: 0% 100%; }
+}
+
+@keyframes starTwinkle {
+    0% { opacity: 0.3; }
+    100% { opacity: 1; }
+}
+
+@keyframes raindropFall {
+    0% {
+        transform: translateY(-20px) translateX(0);
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(100vh) translateX(20px);
+        opacity: 0;
+    }
+}
+
+@keyframes snowflakeFall {
+    0% {
+        transform: translateY(-20px) translateX(0) rotate(0deg);
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.8;
+    }
+    90% {
+        opacity: 0.8;
+    }
+    100% {
+        transform: translateY(100vh) translateX(50px) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+@keyframes sunbeamRotate {
+    0% {
+        transform: rotate(0deg);
+        opacity: 0.3;
+    }
+    50% {
+        opacity: 0.6;
+    }
+    100% {
+        transform: rotate(360deg);
+        opacity: 0.3;
+    }
 }
 
 .weather-container {

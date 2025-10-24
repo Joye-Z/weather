@@ -371,32 +371,104 @@ function generateLifeAdvice(data) {
     });
 }
 
-// 更新背景
+// 更新背景和动态效果
 function updateBackground(weather) {
     const body = document.body;
     body.className = ''; // 清除所有天气类
     
     // 确保weather参数存在且是字符串
     if (!weather || typeof weather !== 'string') {
-        body.classList.add('sunny');
-        return;
+        weather = '晴';
     }
+    
+    // 清除现有的粒子效果
+    const existingParticles = document.getElementById('weatherParticles');
+    if (existingParticles) {
+        existingParticles.remove();
+    }
+    
+    // 创建粒子效果容器
+    const particlesContainer = document.createElement('div');
+    particlesContainer.id = 'weatherParticles';
+    particlesContainer.className = 'weather-particles';
+    body.appendChild(particlesContainer);
+    
+    let weatherClass = 'sunny';
     
     if (weather.includes('晴')) {
         const now = new Date().getHours();
         if (now >= 18 || now <= 6) {
-            body.classList.add('night');
+            weatherClass = 'night';
+            createStars(particlesContainer);
         } else {
-            body.classList.add('sunny');
+            weatherClass = 'sunny';
+            createSunbeams(particlesContainer);
         }
     } else if (weather.includes('云') || weather.includes('阴')) {
-        body.classList.add('cloudy');
+        weatherClass = 'cloudy';
     } else if (weather.includes('雨')) {
-        body.classList.add('rainy');
+        weatherClass = 'rainy';
+        createRaindrops(particlesContainer);
     } else if (weather.includes('雪')) {
-        body.classList.add('snowy');
+        weatherClass = 'snowy';
+        createSnowflakes(particlesContainer);
     } else {
-        body.classList.add('night');
+        weatherClass = 'night';
+        createStars(particlesContainer);
+    }
+    
+    body.classList.add(weatherClass);
+    console.log('应用天气样式:', weatherClass);
+}
+
+// 创建雨滴效果
+function createRaindrops(container) {
+    for (let i = 0; i < 50; i++) {
+        const raindrop = document.createElement('div');
+        raindrop.className = 'raindrop';
+        raindrop.style.left = `${Math.random() * 100}%`;
+        raindrop.style.animationDelay = `${Math.random() * 2}s`;
+        raindrop.style.animationDuration = `${1 + Math.random() * 1}s`;
+        container.appendChild(raindrop);
+    }
+}
+
+// 创建雪花效果
+function createSnowflakes(container) {
+    for (let i = 0; i < 30; i++) {
+        const snowflake = document.createElement('div');
+        snowflake.className = 'snowflake';
+        snowflake.style.left = `${Math.random() * 100}%`;
+        snowflake.style.animationDelay = `${Math.random() * 5}s`;
+        snowflake.style.animationDuration = `${5 + Math.random() * 3}s`;
+        snowflake.style.opacity = `${0.3 + Math.random() * 0.5}`;
+        container.appendChild(snowflake);
+    }
+}
+
+// 创建星星效果
+function createStars(container) {
+    for (let i = 0; i < 100; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.left = `${Math.random() * 100}%`;
+        star.style.top = `${Math.random() * 100}%`;
+        star.style.animationDelay = `${Math.random() * 3}s`;
+        star.style.opacity = `${0.1 + Math.random() * 0.5}`;
+        container.appendChild(star);
+    }
+}
+
+// 创建阳光光束效果
+function createSunbeams(container) {
+    for (let i = 0; i < 8; i++) {
+        const sunbeam = document.createElement('div');
+        sunbeam.className = 'sunbeam';
+        sunbeam.style.left = '50%';
+        sunbeam.style.top = '50%';
+        sunbeam.style.transformOrigin = 'center';
+        sunbeam.style.animationDelay = `${i * 1.25}s`;
+        container.appendChild(sunbeam);
     }
 }
 
