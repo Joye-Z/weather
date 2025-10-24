@@ -34,9 +34,9 @@ body.night {
 }
 
 .weather-container {
-    max-width: 500px;
+    max-width: 600px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 30px 20px;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -282,10 +282,151 @@ body.night {
     display: none !important;
 }
 
+/* 天气预报样式 */
+.forecast-section h3 {
+    color: #2d3436;
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 1.3rem;
+    position: relative;
+}
+
+.forecast-section h3::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, #74b9ff, #0984e3);
+    border-radius: 2px;
+}
+
+.forecast-content {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 25px;
+}
+
+.forecast-day {
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 15px;
+    padding: 15px 10px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(116, 185, 255, 0.2);
+}
+
+.forecast-day:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    border-color: rgba(116, 185, 255, 0.4);
+}
+
+.forecast-date {
+    font-size: 0.85rem;
+    color: #636e72;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.forecast-day-name {
+    font-size: 0.75rem;
+    color: #0984e3;
+    background: rgba(116, 185, 255, 0.1);
+    padding: 3px 8px;
+    border-radius: 12px;
+    display: inline-block;
+    margin-bottom: 10px;
+}
+
+.forecast-icon {
+    font-size: 1.8rem;
+    margin: 8px 0;
+    color: #fdcb6e;
+}
+
+.forecast-weather {
+    font-size: 0.8rem;
+    color: #2d3436;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.forecast-temp {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    font-size: 0.9rem;
+}
+
+.temp-high {
+    color: #e17055;
+    font-weight: 600;
+}
+
+.temp-low {
+    color: #74b9ff;
+    font-weight: 600;
+}
+
+/* 美化生活建议区域 */
+.life-advice h3 {
+    color: #2d3436;
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 1.3rem;
+    position: relative;
+}
+
+.life-advice h3::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, #00b894, #00cec9);
+    border-radius: 2px;
+}
+
+.advice-item {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 18px;
+    border-radius: 12px;
+    border-left: 4px solid #00b894;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+}
+
+.advice-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+}
+
+.advice-item h4 {
+    color: #2d3436;
+    margin-bottom: 8px;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.advice-item p {
+    color: #636e72;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
 /* 响应式设计 */
 @media (max-width: 768px) {
     .weather-container {
-        padding: 15px;
+        padding: 20px 15px;
     }
     
     .search-section h1 {
@@ -305,7 +446,36 @@ body.night {
         gap: 10px;
     }
     
+    .forecast-content {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+    }
+    
     .advice-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .forecast-day {
+        padding: 12px 8px;
+    }
+    
+    .forecast-icon {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .forecast-content {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .search-section h1 {
+        font-size: 1.8rem;
+    }
+}
+
+@media (max-width: 320px) {
+    .forecast-content {
         grid-template-columns: 1fr;
     }
 }

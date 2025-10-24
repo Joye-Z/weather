@@ -122,7 +122,7 @@ async function searchWeather() {
     }
 }
 
-// 获取天气数据
+// 获取天气数据（包含未来预报）
 async function getWeatherData(city) {
     // 首先获取城市的地理编码
     const geocodeResponse = await fetch(`${AMAP_GEOCODE_URL}?key=${AMAP_API_KEY}&address=${encodeURIComponent(city)}`);
@@ -134,41 +134,135 @@ async function getWeatherData(city) {
     
     const adcode = geocodeData.geocodes[0].adcode;
     
-    // 获取天气信息
-    const weatherResponse = await fetch(`${AMAP_WEATHER_URL}?key=${AMAP_API_KEY}&city=${adcode}&extensions=base`);
-    const weatherData = await weatherResponse.json();
-    
-    if (weatherData.status !== '1' || !weatherData.lives || weatherData.lives.length === 0) {
-        throw new Error('获取天气信息失败');
+    try {
+        // 同时获取当前天气和未来预报
+        const [currentWeatherResponse, forecastResponse] = await Promise.all([
+            fetch(`${AMAP_WEATHER_URL}?key=${AMAP_API_KEY}&city=${adcode}&extensions=base`),
+            fetch(`${AMAP_WEATHER_URL}?key=${AMAP_API_KEY}&city=${adcode}&extensions=all`)
+        ]);
+        
+        const currentWeatherData = await currentWeatherResponse.json();
+        const forecastData = await forecastResponse.json();
+        
+        if (currentWeatherData.status !== '1' || !currentWeatherData.lives || currentWeatherData.lives.length === 0) {
+            throw new Error('获取当前天气信息失败');
+        }
+        
+        if (forecastData.status !== '1' || !forecastData.forecasts || forecastData.forecasts.length === 0) {
+            throw new Error('获取天气预报信息失败');
+        }
+        
+        return {
+            current: currentWeatherData.lives[0],
+            forecast: forecastData.forecasts[0]
+        };
+    } catch (error) {
+        console.error('API请求错误:', error);
+        throw new Error('网络请求失败，请检查网络连接');
     }
-    
-    return weatherData.lives[0];
 }
 
 // 显示天气信息
 function displayWeather(data) {
     hideAll();
     
+    const currentData = data.current;
+    const forecastData = data.forecast;
+    
     // 更新基本信息
-    document.getElementById('cityName').textContent = data.city;
-    document.getElementById('updateTime').textContent = `更新时间: ${formatTime(data.reporttime)}`;
-    document.getElementById('tempValue').textContent = data.temperature;
-    document.getElementById('weatherText').textContent = data.weather;
-    document.getElementById('windPower').textContent = data.windpower;
-    document.getElementById('windDirection').textContent = data.winddirection;
-    document.getElementById('humidity').textContent = data.humidity;
+    document.getElementById('cityName').textContent = currentData.city;
+    document.getElementById('updateTime').textContent = `更新时间: ${formatTime(currentData.reporttime)}`;
+    document.getElementById('tempValue').textContent = currentData.temperature;
+    document.getElementById('weatherText').textContent = currentData.weather;
+    document.getElementById('windPower').textContent = currentData.windpower;
+    document.getElementById('windDirection').textContent = currentData.winddirection;
+    document.getElementById('humidity').textContent = currentData.humidity;
     
     // 更新天气图标
     const weatherIcon = document.getElementById('weatherIcon');
-    const iconClass = weatherIcons[data.weather] || 'fa-cloud';
+    const iconClass = weatherIcons[currentData.weather] || 'fa-cloud';
     weatherIcon.className = `fas ${iconClass}`;
     
     // 生成生活建议
-    generateLifeAdvice(data);
+    generateLifeAdvice(currentData);
+    
+    // 显示未来天气预报
+    if (forecastData && forecastData.casts) {
+        console.log('预报数据详情:', forecastData.casts);
+        displayForecast(forecastData.casts);
+    } else {
+        // 如果API没有返回预报数据，显示提示
+        showForecastUnavailable();
+    }
+    
+    // 更新背景（确保weather属性存在）
+    if (currentData && currentData.weather) {
+        updateBackground(currentData.weather);
+    } else {
+        updateBackground('晴'); // 默认背景
+    }
     
     // 显示天气信息
     weatherInfo.classList.remove('hidden');
     weatherInfo.classList.add('fade-in');
+}
+
+// 显示未来天气预报
+function displayForecast(casts) {
+    const forecastContent = document.getElementById('forecastContent');
+    forecastContent.innerHTML = '';
+    
+    console.log('API返回的预报数据:', casts);
+    
+    // 检查数据长度，确保有足够的数据
+    if (!casts || casts.length <= 1) {
+        showForecastUnavailable();
+        return;
+    }
+    
+    // 高德API提供3天预报，从第二天开始显示未来3天（不包含今天）
+    const forecastDays = casts.slice(1, 4);
+    
+    console.log('处理后显示的预报天数:', forecastDays.length);
+    
+    forecastDays.forEach((cast, index) => {
+        const forecastDay = document.createElement('div');
+        forecastDay.className = 'forecast-day';
+        
+        const date = new Date(cast.date);
+        const dayName = getDayName(date.getDay());
+        const formattedDate = formatForecastDate(cast.date);
+        
+        // 确保数据字段存在，使用备用值
+        const dayWeather = cast.dayweather || cast.weather || '未知';
+        const dayTemp = cast.daytemp || '--';
+        const nightTemp = cast.nighttemp || '--';
+        
+        forecastDay.innerHTML = `
+            <div class="forecast-date">${formattedDate}</div>
+            <div class="forecast-day-name">${dayName}</div>
+            <i class="fas ${weatherIcons[dayWeather] || 'fa-cloud'} forecast-icon"></i>
+            <div class="forecast-weather">${dayWeather}</div>
+            <div class="forecast-temp">
+                <span class="temp-high">${dayTemp}°</span>
+                <span class="temp-low">${nightTemp}°</span>
+            </div>
+        `;
+        
+        forecastContent.appendChild(forecastDay);
+    });
+}
+
+// 显示预报不可用提示
+function showForecastUnavailable() {
+    const forecastContent = document.getElementById('forecastContent');
+    forecastContent.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 20px; color: #636e72;">
+            <i class="fas fa-info-circle" style="font-size: 2rem; margin-bottom: 10px; color: #74b9ff;"></i>
+            <p>未来天气预报数据暂不可用</p>
+            <p style="font-size: 0.8rem; margin-top: 5px;">请确保使用有效的高德API密钥</p>
+        </div>
+    `;
 }
 
 // 生成生活建议
@@ -259,6 +353,12 @@ function generateLifeAdvice(data) {
         });
     }
     
+    // 空气质量建议（模拟）
+    adviceItems.push({
+        title: '🌱 空气质量',
+        content: '当前空气质量良好，适宜户外活动'
+    });
+    
     // 渲染建议内容
     adviceItems.forEach(item => {
         const adviceItem = document.createElement('div');
@@ -275,6 +375,12 @@ function generateLifeAdvice(data) {
 function updateBackground(weather) {
     const body = document.body;
     body.className = ''; // 清除所有天气类
+    
+    // 确保weather参数存在且是字符串
+    if (!weather || typeof weather !== 'string') {
+        body.classList.add('sunny');
+        return;
+    }
     
     if (weather.includes('晴')) {
         const now = new Date().getHours();
@@ -299,6 +405,16 @@ function formatTime(timeString) {
     return timeString.replace('T', ' ').substring(0, 16);
 }
 
+function formatForecastDate(dateString) {
+    const date = new Date(dateString);
+    return `${date.getMonth() + 1}/${date.getDate()}`;
+}
+
+function getDayName(dayIndex) {
+    const days = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+    return days[dayIndex];
+}
+
 function hideAll() {
     weatherInfo.classList.add('hidden');
     loading.classList.add('hidden');
@@ -320,17 +436,70 @@ window.addEventListener('error', function(e) {
 // 添加示例数据用于演示（在没有API密钥时使用）
 function loadDemoData() {
     const demoData = {
-        city: '北京',
-        reporttime: '2024-01-24 14:00:00',
-        temperature: '15',
-        weather: '晴',
-        windpower: '3级',
-        winddirection: '东南风',
-        humidity: '45'
+        current: {
+            city: '北京',
+            reporttime: '2024-01-24 14:00:00',
+            temperature: '15',
+            weather: '晴',
+            windpower: '3级',
+            winddirection: '东南风',
+            humidity: '45'
+        },
+        forecast: {
+            casts: [
+                {
+                    date: '2024-01-24', // 今天
+                    dayweather: '晴',
+                    daytemp: '18',
+                    nighttemp: '8'
+                },
+                {
+                    date: '2024-01-25', // 明天
+                    dayweather: '多云',
+                    daytemp: '16',
+                    nighttemp: '7'
+                },
+                {
+                    date: '2024-01-26',
+                    dayweather: '阴',
+                    daytemp: '14',
+                    nighttemp: '6'
+                },
+                {
+                    date: '2024-01-27',
+                    dayweather: '小雨',
+                    daytemp: '12',
+                    nighttemp: '5'
+                },
+                {
+                    date: '2024-01-28',
+                    dayweather: '晴',
+                    daytemp: '15',
+                    nighttemp: '7'
+                },
+                {
+                    date: '2024-01-29',
+                    dayweather: '多云',
+                    daytemp: '17',
+                    nighttemp: '8'
+                },
+                {
+                    date: '2024-01-30',
+                    dayweather: '晴',
+                    daytemp: '19',
+                    nighttemp: '9'
+                },
+                {
+                    date: '2024-01-31',
+                    dayweather: '阴',
+                    daytemp: '16',
+                    nighttemp: '7'
+                }
+            ]
+        }
     };
     
     displayWeather(demoData);
-    updateBackground(demoData.weather);
 }
 
 // 检查API密钥，如果没有则使用演示数据
@@ -339,5 +508,12 @@ if (AMAP_API_KEY === '你的高德API密钥') {
     // 页面加载完成后显示演示数据
     document.addEventListener('DOMContentLoaded', function() {
         setTimeout(loadDemoData, 1000);
+    });
+} else {
+    // 如果有有效的API密钥，在页面加载时显示提示
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('使用高德天气API获取实时数据');
+        // 可以在这里添加默认城市的自动查询
+        // searchWeatherForCity('北京');
     });
 }
