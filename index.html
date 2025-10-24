@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能天气信息面板</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="weather-container">
+        <div class="search-section">
+            <h1>智能天气查询</h1>
+            <div class="search-box">
+                <div class="input-container">
+                    <input type="text" id="cityInput" placeholder="输入城市名称..." autocomplete="off">
+                    <button id="searchBtn">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                <div id="suggestions" class="suggestions"></div>
+            </div>
+        </div>
+
+        <div id="weatherInfo" class="weather-info hidden">
+            <div class="current-weather">
+                <div class="location">
+                    <h2 id="cityName"></h2>
+                    <p id="updateTime"></p>
+                </div>
+                <div class="weather-main">
+                    <div class="temperature">
+                        <span id="tempValue"></span>
+                        <span class="unit">°C</span>
+                    </div>
+                    <div class="weather-condition">
+                        <i id="weatherIcon" class="fas fa-sun"></i>
+                        <span id="weatherText"></span>
+                    </div>
+                </div>
+                <div class="weather-details">
+                    <div class="detail-item">
+                        <i class="fas fa-wind"></i>
+                        <span>风力: <span id="windPower"></span></span>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-compass"></i>
+                        <span>风向: <span id="windDirection"></span></span>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-tint"></i>
+                        <span>湿度: <span id="humidity"></span>%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="life-advice">
+                <h3>生活建议</h3>
+                <div id="adviceContent" class="advice-content"></div>
+            </div>
+        </div>
+
+        <div id="loading" class="loading hidden">
+            <div class="spinner"></div>
+            <p>正在获取天气信息...</p>
+        </div>
+
+        <div id="error" class="error hidden">
+            <i class="fas fa-exclamation-triangle"></i>
+            <p id="errorMessage"></p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
